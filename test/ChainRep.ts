@@ -46,7 +46,13 @@ describe("ChainRep", function () {
         const publishTx = await chainRep.connect(reporterCertified).publishReport([chainRep.address, accounts[0].address, accounts[1].address], ["chainrep.io", "www.chainrep.io"], ["test", "not really a scam"], "ipfs://bafkreieb5xpcpwatmqmm2eb6y2f72fx2yokapmrq75axqt3jdoc542dpd4");
         const publishTxReceipt = await publishTx.wait();
         console.log(publishTxReceipt.gasUsed);
-        console.group(publishTxReceipt.events);
+        // console.group(publishTxReceipt.events);
+
+        // Query for the certified report:
+        const reports = await chainRep.getCertifiedContractReports(chainRep.address, [certId]);
+        console.log(reports);
+        expect(reports).to.have.lengthOf(1);
+        expect(reports[0].reportId).to.equal(0);
 
     });
   });
