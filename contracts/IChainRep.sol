@@ -40,7 +40,7 @@ interface IChainRep {
 
     function numReports () external view returns(uint256);
 
-    function publishReport (address[] calldata contractAddresses, string[] calldata domains, string[] calldata tags, string calldata uri) external;
+    function publishReport (address[] memory contractAddresses, string[] memory domains, string[] memory tags, string calldata uri) external;
 
     function unPublishReport (uint256 reportId) external;
 

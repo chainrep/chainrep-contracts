@@ -56,7 +56,7 @@ contract ChainRep is IChainRep, Context {
         return _reportId;
     }
 
-    function publishReport (address[] calldata contractAddresses, string[] calldata domains, string[] calldata tags, string calldata uri) external {
+    function publishReport (address[] memory contractAddresses, string[] memory domains, string[] memory tags, string calldata uri) external {
         uint256 id = _reportId++;
         _reportMap[id].reviewer = _msgSender();
         _reportMap[id].contractAddresses = contractAddresses;
