@@ -5,10 +5,8 @@ interface IChainRep {
 
     struct Report {
         address reviewer;
-        address[] contractAddresses;
-        string[] domains;
-        string[] tags;
         string uri;
+        bool published;
     }
 
     struct Certificate {
@@ -24,9 +22,15 @@ interface IChainRep {
 
     event TransferCertificateAuthority(uint256 indexed certificateId, address indexed from, address indexed to);
 
-    event PublishReport(uint256 indexed reportId, address indexed reviewer, Report report);
+    event PublishReport(uint256 indexed reportId, address indexed reviewer);
 
-    event UnPublishReport(uint256 indexed reportId, address indexed reviewer, Report report);
+    event ContractReported(uint256 indexed reportId, address indexed contractAddress);
+
+    event DomainReported(uint256 indexed reportId, string indexed domain);
+
+    event TagReported(uint256 indexed reportId, string indexed tag);
+
+    event UnPublishReport(uint256 indexed reportId, address indexed reviewer);
 
     function numCertificates () external view returns(uint256);
 
@@ -34,17 +38,19 @@ interface IChainRep {
 
     function revokeCertificate (uint256 certificateId, address reviewer) external;
 
-    function createCertificate (string calldata name) external;
+    function createCertificate (string calldata name) external returns(uint256);
 
     function transferCertificateAuthority (uint256 certificateId, address to) external;
 
     function numReports () external view returns(uint256);
 
-    function publishReport (address[] memory contractAddresses, string[] memory domains, string[] memory tags, string calldata uri) external;
+    function publishReport (address[] calldata contractAddresses, string[] calldata domains, string[] calldata tags, string calldata uri) external returns(uint256);
 
     function unPublishReport (uint256 reportId) external;
 
     function getReport (uint256 reportId) external view returns(Report memory);
+
+    function isReviewer (address reviewer, uint256 reportId) external view returns(bool);
 
     function getCertifiedContractReports (address contractAddress, uint256[] memory certificateIds) external view returns(Report[] memory);
 

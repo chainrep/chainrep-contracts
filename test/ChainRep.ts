@@ -11,12 +11,12 @@ describe("ChainRep", function () {
   async function deployChainRepFixture() {
 
     // Contracts are deployed using the first signer/account by default
-    const [owner, ...otherAccounts] = await ethers.getSigners();
+    const [owner, ...accounts] = await ethers.getSigners();
 
     const ChainRep = await ethers.getContractFactory("ChainRep");
     const chainRep = await ChainRep.deploy();
 
-    return { chainRep, owner, otherAccounts };
+    return { chainRep, owner, accounts };
   }
 
   describe("Deployment", function () {
@@ -26,6 +26,30 @@ describe("ChainRep", function () {
       expect(await chainRep.numReports()).to.equal(0);
       expect(await chainRep.numCertificates()).to.equal(0);
     });
+
+    it("Should let me see how much gas is used by some concerning functions...", async function () {
+        const { chainRep, accounts } = await loadFixture(deployChainRepFixture);
+        
+        // Set up accounts:
+        const reporterCertified = accounts[0];
+        const reporterNotCertified = accounts[1];
+
+        // Add certificate:
+        const certIdTx = await chainRep.createCertificate("Test Cert");
+        const certId = ((await certIdTx.wait()).events?.find((event) => event.event === "CreateCertificate")?.args ?? [])[0];
+        if(!certId) throw new Error("Could not find certId from tx events...");
+        const issueTx = await chainRep.issueCertificate(certId, reporterCertified.address);
+        const issueTxReceipt = await issueTx.wait();
+        console.log(issueTxReceipt.gasUsed);
+
+        // Make a report:
+        const publishTx = await chainRep.connect(reporterCertified).publishReport([chainRep.address, accounts[0].address, accounts[1].address], ["chainrep.io", "www.chainrep.io"], ["test", "not really a scam"], "ipfs://bafkreieb5xpcpwatmqmm2eb6y2f72fx2yokapmrq75axqt3jdoc542dpd4");
+        const publishTxReceipt = await publishTx.wait();
+        console.log(publishTxReceipt.gasUsed);
+        console.group(publishTxReceipt.events);
+
+    });
   });
+
 
 });

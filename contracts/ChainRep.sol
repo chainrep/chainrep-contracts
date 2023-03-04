@@ -19,8 +19,13 @@ contract ChainRep is IChainRep, Context {
 
     constructor() { }
 
-    modifier isAuthority(uint256 certificateId) {
+    modifier _isAuthority(uint256 certificateId) {
         require(_certificateMap[certificateId].authority == _msgSender(), "not authority");
+        _;
+    }
+
+    modifier _isReviewer(uint256 reportId) {
+        require(_reportMap[reportId].reviewer == _msgSender(), "not reviewer");
         _;
     }
 
@@ -28,26 +33,27 @@ contract ChainRep is IChainRep, Context {
         return _certificateId;
     }
 
-    function issueCertificate (uint256 certificateId, address reviewer) external isAuthority(certificateId) {
+    function issueCertificate (uint256 certificateId, address reviewer) external _isAuthority(certificateId) {
         require(!_certificateIssued[certificateId][reviewer], "already issued");
         _certificateIssued[certificateId][reviewer] = true;
         emit IssueCertificate(certificateId, _msgSender(), reviewer);
     }
 
-    function revokeCertificate (uint256 certificateId, address reviewer) external isAuthority(certificateId) {
+    function revokeCertificate (uint256 certificateId, address reviewer) external _isAuthority(certificateId) {
         require(_certificateIssued[certificateId][reviewer], "not issued");
         delete _certificateIssued[certificateId][reviewer];
         emit RevokeCertificate(certificateId, _msgSender(), reviewer);
     }
 
-    function createCertificate (string calldata name) external {
+    function createCertificate (string calldata name) external returns(uint256) {
         uint256 id = _certificateId++;
         _certificateMap[id].name = name;
         _certificateMap[id].authority = _msgSender();
         emit CreateCertificate(id, _msgSender(), name);
+        return id;
     }
 
-    function transferCertificateAuthority (uint256 certificateId, address to) external isAuthority(certificateId) {
+    function transferCertificateAuthority (uint256 certificateId, address to) external _isAuthority(certificateId) {
         _certificateMap[certificateId].authority = to;
         emit TransferCertificateAuthority(certificateId, _msgSender(), to);
     }
@@ -56,26 +62,51 @@ contract ChainRep is IChainRep, Context {
         return _reportId;
     }
 
-    function publishReport (address[] memory contractAddresses, string[] memory domains, string[] memory tags, string calldata uri) external {
+    function publishReport (address[] calldata contractAddresses, string[] calldata domains, string[] calldata tags, string calldata uri) external returns(uint256) {
+
+        // Get report ID:
         uint256 id = _reportId++;
+
+        // Set report data:
         _reportMap[id].reviewer = _msgSender();
-        _reportMap[id].contractAddresses = contractAddresses;
-        _reportMap[id].domains = domains;
-        _reportMap[id].tags = tags;
         _reportMap[id].uri = uri;
-        emit PublishReport(id, _msgSender(), _reportMap[id]);
+        _reportMap[id].published = true;
+
+        // Add reportId to contract address mapping set:
+        for(uint i; i < contractAddresses.length; i++) {
+            _contractReports[contractAddresses[i]].add(id);
+        }
+
+        // Emit indexed report references:
+        for(uint i = 0; i < contractAddresses.length; i++) {
+            emit ContractReported(id, contractAddresses[i]);
+        }
+        for(uint i = 0; i < domains.length; i++) {
+            emit DomainReported(id, domains[i]);
+        }
+        for(uint i = 0; i < tags.length; i++) {
+            emit TagReported(id, tags[i]);
+        }
+
+        // Emit Report Publish event:
+        emit PublishReport(id, _msgSender());
+
+        return id;
     }
 
-    function unPublishReport (uint256 reportId) external {
-        Report memory report = _reportMap[reportId];
-        for(uint256 i; i < report.contractAddresses.length; i++) {
-            _contractReports[report.contractAddresses[i]].remove(reportId);
-        }
+    function unPublishReport (uint256 reportId) external _isReviewer(reportId) {
+        _reportMap[reportId].published = false;
+        emit UnPublishReport(reportId, _msgSender());
     }
 
     function getReport (uint256 reportId) external view returns(Report memory) {
         require(reportId < _reportId, "report dne");
-        return _reportMap[reportId];
+        return (_reportMap[reportId]);
+    }
+
+    function isReviewer (address reviewer, uint256 reportId) public view returns(bool) {
+        require(reportId < _reportId, "report dne");
+        return reviewer == _reportMap[reportId].reviewer;
     }
 
     /**
@@ -87,10 +118,12 @@ contract ChainRep is IChainRep, Context {
         Report[] memory res = new Report[](maxLength);
         for(uint256 i = 0; i < maxLength; i++) {
             uint256 reportId = _contractReports[contractAddress].at(i);
-            for(uint256 j = 0; j < certificateIds.length; j++) {
-                if(isCertified(_reportMap[reportId].reviewer, certificateIds[j])) {
-                    res[numCertified++] = _reportMap[reportId];
-                    break;
+            if(_reportMap[reportId].published) {
+                for(uint256 j = 0; j < certificateIds.length; j++) {
+                    if(isCertified(_reportMap[reportId].reviewer, certificateIds[j])) {
+                        res[numCertified++] = _reportMap[reportId];
+                        break;
+                    }
                 }
             }
         }
