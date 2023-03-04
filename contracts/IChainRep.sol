@@ -4,6 +4,7 @@ pragma solidity ^0.8.9;
 interface IChainRep {
 
     struct Report {
+        uint256 reportId;
         address reviewer;
         string uri;
         bool published;

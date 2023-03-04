@@ -68,6 +68,7 @@ contract ChainRep is IChainRep, Context {
         uint256 id = _reportId++;
 
         // Set report data:
+        _reportMap[id].reportId = id;
         _reportMap[id].reviewer = _msgSender();
         _reportMap[id].uri = uri;
         _reportMap[id].published = true;
