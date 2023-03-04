@@ -74,14 +74,12 @@ contract ChainRep is IChainRep, Context {
         _reportMap[id].published = true;
 
         // Add reportId to contract address mapping set:
-        for(uint i; i < contractAddresses.length; i++) {
-            _contractReports[contractAddresses[i]].add(id);
-        }
-
-        // Emit indexed report references:
         for(uint i = 0; i < contractAddresses.length; i++) {
+            _contractReports[contractAddresses[i]].add(id);
             emit ContractReported(id, contractAddresses[i]);
         }
+
+        // Emit additional indexed report references:
         for(uint i = 0; i < domains.length; i++) {
             emit DomainReported(id, domains[i]);
         }
@@ -120,11 +118,15 @@ contract ChainRep is IChainRep, Context {
         for(uint256 i = 0; i < maxLength; i++) {
             uint256 reportId = _contractReports[contractAddress].at(i);
             if(_reportMap[reportId].published) {
-                for(uint256 j = 0; j < certificateIds.length; j++) {
-                    if(isCertified(_reportMap[reportId].reviewer, certificateIds[j])) {
-                        res[numCertified++] = _reportMap[reportId];
-                        break;
+                if(certificateIds.length > 0) {
+                    for(uint256 j = 0; j < certificateIds.length; j++) {
+                        if(isCertified(_reportMap[reportId].reviewer, certificateIds[j])) {
+                            res[numCertified++] = _reportMap[reportId];
+                            break;
+                        }
                     }
+                } else {
+                    res[numCertified++] = _reportMap[reportId];
                 }
             }
         }
