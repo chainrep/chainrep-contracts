@@ -1,0 +1,13 @@
+type Report @entity {
+  id: String! # uint256
+  contractAddress: Bytes
+  reviewer: Bytes! # address
+  uri: String!
+  published: Boolean!
+}
+
+type Certificate @entity {
+  id: String!
+  authority: Bytes! # address
+  name: String!
+}
