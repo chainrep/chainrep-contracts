@@ -56,7 +56,15 @@ export function handleContractReported(event: ContractReported): void {
   // - contract.publishReport(...)
 }
 
-export function handleCreateCertificate(event: CreateCertificate): void {}
+export function handleCreateCertificate(event: CreateCertificate): void {
+  const id = event.params.certificateId.toString()
+  const authority = event.params.authority
+  const name = event.params.name
+  let entity = Certificate.load(id)
+  if (!entity) entity = new Certificate(id, authority, name) // TODO??
+
+  entity.save()
+}
 
 export function handleDomainReported(event: DomainReported): void {}
 
