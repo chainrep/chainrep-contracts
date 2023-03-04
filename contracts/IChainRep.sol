@@ -4,18 +4,23 @@ pragma solidity ^0.8.0;
 interface IChainRep {
 
   struct Report {
-    uint256 reportId;
+    address reviewer;
     address[] contractAddresses;
     string[] domains;
     string[] tags;
     string uri;
   }
 
+  struct Certificate {
+    address authority;
+    string name;
+  }
+
   event IssueCertificate(uint256 indexed certificateId, address indexed authority, address indexed reviewer);
 
   event RevokeCertificate(uint256 indexed certificateId, address indexed authority, address indexed reviewer);
 
-  event CreateCertificate(uint256 indexed certificateId, address indexed authority);
+  event CreateCertificate(uint256 indexed certificateId, address indexed authority, string name);
 
   event TransferCertificateAuthority(uint256 indexed certificateId, address indexed from, address indexed to);
 
