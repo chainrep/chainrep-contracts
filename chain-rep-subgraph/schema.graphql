@@ -1,7 +1,6 @@
 type Report @entity {
   id: String! # uint256
-  contractAddress: Bytes
-  reviewer: Bytes! # address
+  reviewer: Bytes # address
   uri: String!
   published: Boolean!
 }
@@ -10,4 +9,44 @@ type Certificate @entity {
   id: String!
   authority: Bytes! # address
   name: String!
+}
+
+type ContractAddress @entity(immutable: true) {
+  id: Bytes!
+}
+
+type ReportContractAddress @entity {
+  id: String! # Set to `report.id.concat(contractAddress.id)`
+  report: Report!
+  contractAddress: ContractAddress!
+}
+
+type Domain @entity(immutable: true) {
+  id: String!
+}
+
+type ReportDomain @entity {
+  id: String! # Set to `report.id.concat(domain.id)`
+  report: Report!
+  domain: Domain!
+}
+
+type Reviewer @entity(immutable: true) {
+  id: Bytes!
+}
+
+type CertificateReviewer @entity {
+  id: String!
+  certificate: Certificate!
+  reviewer: Reviewer!
+}
+
+type Tag @entity(immutable: true) {
+  id: String!
+}
+
+type ReportTag @entity {
+  id: String! # Set to `report.id.concat(tag.id)`
+  report: Report!
+  tag: Tag!
 }
