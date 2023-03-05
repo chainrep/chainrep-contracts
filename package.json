@@ -1,11 +1,28 @@
 {
   "name": "chain-rep-contracts",
   "devDependencies": {
+    "@graphprotocol/graph-cli": "^0.36.1",
+    "@graphprotocol/graph-ts": "^0.29.0",
+    "@graphprotocol/hardhat-graph": "https://github.com/graphprotocol/hardhat-graph",
     "@nomicfoundation/hardhat-toolbox": "^2.0.2",
+    "@nomiclabs/hardhat-waffle": "^2.0.5",
+    "@typechain/hardhat": "^6.1.5",
+    "dotenv": "^16.0.3",
     "hardhat": "^2.13.0",
-    "hardhat-graph": "https://github.com/graphprotocol/hardhat-graph"
+    "hardhat-gas-reporter": "^1.0.9",
+    "solidity-coverage": "^0.8.2"
   },
   "dependencies": {
     "@openzeppelin/contracts": "^4.8.2"
+  },
+  "scripts": {
+    "graph-local": "docker-compose up",
+    "hardhat-local": "hardhat node --hostname 0.0.0.0",
+    "graph-test": "graph test",
+    "graph-codegen": "cd chain-rep-subgraph && graph codegen",
+    "graph-build": "cd chain-rep-subgraph && graph build",
+    "graph-local-clean": "docker-compose down -v && docker-compose rm -v && rm -rf data/ipfs data/postgres",
+    "create-local": "graph create --node http://127.0.0.1:8020 chain-rep",
+    "deploy-local": "cd chain-rep-subgraph && graph deploy --ipfs http://127.0.0.1:5001 --node http://127.0.0.1:8020 chain-rep"
   }
 }

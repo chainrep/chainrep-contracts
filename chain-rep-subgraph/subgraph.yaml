@@ -1,0 +1,41 @@
+specVersion: 0.0.4
+description: Chain Reports
+schema:
+  file: ./schema.graphql
+dataSources:
+  - kind: ethereum
+    name: ChainRep
+    network: localhost
+    source:
+      address: "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512"
+      abi: ChainRep
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.6
+      language: wasm/assemblyscript
+      entities:
+        - Report
+        - Certificate
+      abis:
+        - name: ChainRep
+          file: ./abis/ChainRep.json
+      eventHandlers:
+        - event: ContractReported(indexed uint256,indexed address)
+          handler: handleContractReported
+        - event: CreateCertificate(indexed uint256,indexed address,string)
+          handler: handleCreateCertificate
+        - event: DomainReported(indexed uint256,indexed string)
+          handler: handleDomainReported
+        - event: IssueCertificate(indexed uint256,indexed address,indexed address)
+          handler: handleIssueCertificate
+        - event: PublishReport(indexed uint256,indexed address)
+          handler: handlePublishReport
+        - event: RevokeCertificate(indexed uint256,indexed address,indexed address)
+          handler: handleRevokeCertificate
+        - event: TagReported(indexed uint256,indexed string)
+          handler: handleTagReported
+        - event: TransferCertificateAuthority(indexed uint256,indexed address,indexed address)
+          handler: handleTransferCertificateAuthority
+        - event: UnPublishReport(indexed uint256,indexed address)
+          handler: handleUnPublishReport
+      file: ./src/chain-rep.ts
