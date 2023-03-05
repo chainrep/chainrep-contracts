@@ -1,8 +1,8 @@
-# Sample Hardhat Project
+# chainrep-contracts
 
-This project demonstrates a basic Hardhat use case. It comes with a sample contract, a test for that contract, and a script that deploys that contract.
+This repository contains the `ChainRep.sol` contract used for the chainrep protocol.
 
-Try running some of the following tasks:
+### Hardhat Functions:
 
 ```shell
 npx hardhat help
